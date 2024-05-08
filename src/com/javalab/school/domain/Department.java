@@ -5,9 +5,9 @@ public class Department {
 	private int departmentId;			//학과 코드
 	private String name;		//학과명
 	private String office;		//교실
-	
-	public Department() {		
-	}	
+
+	public Department() {
+	}
 	public Department(int departmentId, String name, String office) {
 		this.departmentId = departmentId;
 		this.name = name;

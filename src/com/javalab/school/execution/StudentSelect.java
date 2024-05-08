@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 학생 목록을 조회하는 프로그램
- *
+ * <p>
  * [데이터베이스 접속 순서]
  * 1. JDBC 드라이버 로딩 : Class.forName("oracle.jdbc.OracleDriver");
  * 2. 접속 정보 설정 : DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:orcl", "school", "1234");
@@ -18,7 +18,6 @@ import java.util.List;
  * 6. 접속 종료 : Connection 객체를 이용해서 접속 종료
  * 7. 자원 해제 : ResultSet, PreparedStatement, Connection 객체를 이용해서 자원 해제
  * 8. 예외 처리 : try-catch-finally 블록을 이용해서 예외 처리
- *
  */
 public class StudentSelect {
     // 오라클 DB에 접속해서 하기 위한 정보
@@ -48,20 +47,24 @@ public class StudentSelect {
 
     private static void displayStudents(Connection conn) {
         //학생 목록 저장용 ArrayList
-        List<Student> studentList= new ArrayList<>();
+        List<Student> studentList = new ArrayList<>();
 
-                System.out.println("등록된 학생 목록:");
+        System.out.println("등록된 학생 목록:");
         //쿼리문 작성
         String sql = "SELECT s.student_id, s.name, s.year, s.address, s.department_id " +
                 "FROM student s " +
                 "ORDER BY s.student_id";
-        try  {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+
+        try {
             // PreparedStatement : 쿼리 실행을 위한 객체
             // 커넥션 객체로부터 부터 얻어낸 PreparedStatement 객체를 이용해서 쿼리 실행
 
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             //쿼리 실행 그리고 그 결과를 ResultSet 객체에 담는다.
-            ResultSet rs = pstmt.executeQuery(); //
+            rs = pstmt.executeQuery(); //
             //while 문을 이용해서 ResultSet 객체에 담긴 결과를 하나씩 꺼내서 출력
             while (rs.next()) {
                 String studentId = rs.getString("student_id");
@@ -73,12 +76,21 @@ public class StudentSelect {
                         + address + "\t" + departmentId);
 
                 //ResultSet에 있는 행동을 하나씩 학생 객체
-                Student s = new Student(studentId , name ,year ,address,departmentId);
+                Student s = new Student(studentId, name, year, address, departmentId);
 
                 studentList.add(s);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                // 자원해제 -자원이 가장 늦게 만들어진 순서로 해제
+                // ResultSet 해제
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         System.out.println("-----------------------------------------------------------------------");
     } // end of displayStudents
